@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "homepage": "https://erichandronico.github.io/g3n-salud",
+  "homepage": "https://erichandronico.github.io/g3n-salud.git",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
