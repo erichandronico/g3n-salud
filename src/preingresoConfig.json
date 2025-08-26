@@ -1,0 +1,15 @@
+{
+  "title": "Indicación Médica",
+  "fields": [
+    {
+      "type": "array",
+      "name": "indicaciones",
+      "label": "Indicaciones",
+      "fields": [
+        { "name": "medicamento", "label": "Medicamento", "type": "text" },
+        { "name": "dosis", "label": "Dosis", "type": "text" },
+        { "name": "frecuencia", "label": "Frecuencia", "type": "text" }
+      ]
+    }
+  ]
+}
