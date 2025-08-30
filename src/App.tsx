@@ -4,12 +4,9 @@ import { AppRoutes } from './routes/index.tsx';
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.DEV ? "/" : "/g3n-salud"}>
       <AppRoutes />
     </BrowserRouter>
-  // <MainLayout>
-  //   <></>
-  // </MainLayout>
   )
 }
 

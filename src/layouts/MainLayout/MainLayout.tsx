@@ -37,12 +37,29 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <MainHeader menuOpen={menuOpen} setMenuOpen={setMenuOpen} rightPanelOpen={rightPanelOpen} setRightPanelOpen={setRightPanelOpen} />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <MainMenu collapsed={!menuOpen} />
+        {/* Sidebar - Desktop */}
+        <div className="hidden md:block">
+          <MainMenu collapsed={!menuOpen} />
+        </div>
+
+        {/* Sidebar - Mobile overlay */}
+        {menuOpen && (
+          <div className="fixed inset-0 z-40 flex md:hidden">
+            {/* Fondo oscuro para cerrar al hacer click */}
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50"
+              onClick={() => setMenuOpen(false)}
+            ></div>
+
+            <div className="relative w-64 bg-white shadow-lg z-50">
+              <MainMenu collapsed={false} />
+            </div>
+          </div>
+        )}
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto p-6">
-          <NotificationList items={notifications} />
+          {/* <NotificationList items={notifications} /> */}
           {children}
         </main>
 

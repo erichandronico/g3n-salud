@@ -15,7 +15,7 @@ const MainMenu = ({ collapsed }: { collapsed: boolean }) => {
     <div
       className={`transition-all duration-300 ease-in-out transform ${
         collapsed ? "w-16" : "w-64"
-      } overflow-hidden bg-slate-50 p-2 border-r border-slate-200 hidden md:block`}
+      } overflow-hidden bg-slate-50 p-2 border-r border-slate-200 h-full`}
     >
       <nav className="space-y-2">
         {navItems.map((item, index) => (

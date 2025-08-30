@@ -55,56 +55,81 @@ export const FormFactory: React.FC<{ config: FormConfig }> = ({ config }) => {
       <div className={baseClass}>
         <label className={clsx(labelClass)} style={{ marginRight: 10}}>{field.label}</label>
         {items.map((item, index) => (
-          <div key={item.id} className="flex flex-col sm:flex-row gap-2 mb-2">
-            {(field.fields || []).map(subField => {
-              const subName = `${name}.${index}.${subField.name}`;
-              if ((subField as any).type === 'select') {
-                const opts: any[] = (subField as any).options || [];
-                const listId = `list-${subName.replace(/[^a-zA-Z0-9_-]/g, '')}`;
-                return (
-                  <div key={subField.name} className="flex-1">
-                    <div className="relative">
-                      <input
-                        list={listId}
-                        {...register(subName)}
-                        className={clsx(inputClass, 'pr-10')}
-                        placeholder={subField.label}
-                      />
-                      <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div key={item.id} className="mb-2 grid grid-cols-[1fr_40px] gap-2 items-center">
+            <div className={clsx('grid gap-2', gridColsClass(field.colCount || 1))}>
+              {(field.fields || []).map(subField => {
+                const subName = `${name}.${index}.${subField.name}`;
+                const subColSpan = subField.colSpan || 1;
+                const subBaseClass = clsx('space-y-1', 'col-span-1', smColSpan(subColSpan));
+
+                if ((subField as any).type === 'select') {
+                  const opts: any[] = (subField as any).options || [];
+                  const listId = `list-${subName.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+                  return (
+                    <div key={subField.name} className={subBaseClass}>
+                      <div className="relative">
+                        <input
+                          list={listId}
+                          {...register(subName)}
+                          className={clsx(inputClass, 'pr-10')}
+                          placeholder={subField.label}
+                        />
+                        <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      </div>
+                      <datalist id={listId}>
+                        {opts.map((opt: any) => {
+                          const value = typeof opt === 'string' ? opt : (opt.value ?? opt.label ?? '');
+                          const label = typeof opt === 'string' ? opt : (opt.label ?? opt.value ?? '');
+                          return <option key={value} value={value}>{label}</option>;
+                        })}
+                      </datalist>
                     </div>
-                    <datalist id={listId}>
-                      {opts.map((opt: any) => {
-                        const value = typeof opt === 'string' ? opt : (opt.value ?? opt.label ?? '');
-                        const label = typeof opt === 'string' ? opt : (opt.label ?? opt.value ?? '');
-                        return (
-                          <option key={value} value={value}>{label}</option>
-                        );
-                      })}
-                    </datalist>
+                  );
+                }
+
+                if (subField.type === 'string' || subField.type === 'number' || subField.type === 'datetime') {
+                  return (
+                    <div key={subField.name} className={subBaseClass}>
+                      <input
+                        type={subField.type === 'datetime' ? 'datetime-local' : subField.type}
+                        {...register(subName)}
+                        placeholder={subField.label}
+                        className={inputClass}
+                      />
+                    </div>
+                  );
+                }
+
+                if (subField.type === 'boolean') {
+                  return (
+                    <div key={subField.name} className={subBaseClass + ' flex items-center gap-2'}>
+                      <input
+                        type="checkbox"
+                        {...register(subName)}
+                        className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                      />
+                      <label className={labelClass}>{subField.label}</label>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={subField.name} className={subBaseClass}>
+                    {renderField(subField, `${name}.${index}`)}
                   </div>
                 );
-              }
-              if (subField.type === 'string' || subField.type === 'number' || subField.type === 'datetime') {
-                return (
-                  <input
-                    key={subField.name}
-                    type={subField.type === 'datetime' ? 'datetime-local' : subField.type}
-                    {...register(subName)}
-                    placeholder={subField.label}
-                    className={inputClass}
-                  />
-                );
-              }
-              // Fallback para tipos anidados: renderear usando renderField para no perder compatibilidad
-              return (
-                <div key={subField.name} className="flex-1">
-                  {renderField(subField, `${name}.${index}`)}
-                </div>
-              );
-            })}
-            <button type="button" onClick={() => remove(index)} className={btnIconDanger} aria-label="Eliminar" style={{ height: 40, width: 40 }}>
-              <FiTrash2 size={18} style={{ width: 70 }}/>
-            </button>
+              })}
+            </div>
+            <div className="flex items-center justify-center h-full">
+              <button
+                type="button"
+                onClick={() => remove(index)}
+                className={btnIconDanger}
+                aria-label="Eliminar"
+              >
+                <FiTrash2 size={18} />
+              </button>
+            </div>
           </div>
         ))}
         <button type="button" onClick={() => append(newItemDefaults())} className={clsx(btnSecondary, 'mt-1')}>
@@ -164,6 +189,39 @@ export const FormFactory: React.FC<{ config: FormConfig }> = ({ config }) => {
         </div>
       );
     }
+    if (field.type === 'checkbox-group') {
+      return (
+        <div key={field.name} className={baseClass}>
+          <label className={clsx(labelClass, 'block mb-2')}>{field.label}</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {(field as any).options?.map((option: string) => (
+              <label key={option} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  value={option}
+                  {...register(fieldName)}
+                  className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                />
+                <span className="text-sm text-slate-700">{option}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (field.type === 'boolean') {
+      return (
+          <div key={field.name} className={baseClass + ' flex items-center gap-2'}>
+            <input
+              type="checkbox"
+              {...register(fieldName)}
+              className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+            />
+            <label className={clsx(labelClass, 'mb-0')}>{field.label}</label>
+          </div>
+        );
+      }
 
     if (field.type === 'object') {
       return (
@@ -211,9 +269,14 @@ export const FormFactory: React.FC<{ config: FormConfig }> = ({ config }) => {
     );
   };
 
+  const Icon = (config as any).icon;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full">
-      <h2 className="text-2xl font-semibold text-slate-900">{config.title}</h2>
+      <h2 className="text-2xl font-semibold text-slate-900 flex items-center gap-2">
+        {Icon ? <Icon className="text-slate-500" /> : null}
+        {config.title}
+      </h2>
 
       {config.sections
         ? config.sections.map(renderSection)
